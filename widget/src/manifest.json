@@ -1,0 +1,31 @@
+{
+  "widget": {
+    "name": {
+      "en": "AMO Docs",
+      "ru": "Документы"
+    },
+    "description": {
+      "en": "Generate documents from templates using deal data from amoCRM",
+      "ru": "Генерация документов из шаблонов с данными из amoCRM. Договора, счета, КП в один клик."
+    },
+    "short_description": {
+      "en": "Document generation",
+      "ru": "Создание документов"
+    },
+    "version": "1.0.0",
+    "account_settings": [
+      {
+        "key": "api_url",
+        "name": "API URL",
+        "type": "text",
+        "required": true,
+        "default": "https://amo-docs.onrender.com"
+      }
+    ],
+    "init_once": false,
+    "locations": ["lcard-1"],
+    "settings": {
+      "api_url": "https://amo-docs.onrender.com"
+    }
+  }
+}

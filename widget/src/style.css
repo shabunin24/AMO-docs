@@ -1,0 +1,223 @@
+/* ====================================================
+   AMO Docs Widget — стили карточки сделки
+   ==================================================== */
+
+.amd-wrap {
+  padding: 8px 12px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  color: #2d3748;
+}
+
+/* Шапка с кнопкой */
+.amd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.amd-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1a202c;
+}
+
+/* Кнопки */
+.amd-btn {
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  line-height: 1.4;
+}
+
+.amd-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.amd-btn-primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.amd-btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.amd-btn-success {
+  background: #16a34a;
+  color: #fff;
+  padding: 4px 12px;
+}
+
+.amd-btn-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+/* Список документов */
+.amd-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.amd-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.amd-item:last-child {
+  border-bottom: none;
+}
+
+.amd-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.amd-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.amd-date {
+  font-size: 11px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.amd-dl {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.amd-dl:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+/* Пустое состояние / ошибка */
+.amd-empty {
+  color: #94a3b8;
+  text-align: center;
+  padding: 14px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.amd-error {
+  color: #dc2626;
+}
+
+.amd-empty code {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #475569;
+  word-break: break-all;
+}
+
+/* ====================================================
+   Модальное окно
+   ==================================================== */
+.amd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.amd-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 480px;
+  max-width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.amd-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.amd-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #94a3b8;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.amd-modal-close:hover {
+  color: #334155;
+}
+
+.amd-modal-body {
+  padding: 16px 20px 20px;
+}
+
+/* Список шаблонов в модальном */
+.amd-tpl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.amd-tpl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.amd-tpl-item:last-child {
+  border-bottom: none;
+}
+
+.amd-tpl-name {
+  flex: 1;
+  font-size: 13px;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
