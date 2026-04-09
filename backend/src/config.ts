@@ -23,4 +23,5 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const config = parsed.data;
+// parsed.success гарантирован выше через process.exit(1)
+export const config = parsed.data!;
