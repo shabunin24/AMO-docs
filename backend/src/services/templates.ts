@@ -1,132 +1,114 @@
-import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const TEMPLATES_DIR = path.resolve(__dirname, "../../storage/templates");
-export const DOCUMENTS_DIR = path.resolve(__dirname, "../../storage/documents");
+import {
+  DOCUMENTS_BUCKET,
+  TEMPLATES_BUCKET,
+  dbDeleteTemplate,
+  dbGetDocument,
+  dbGetTemplate,
+  dbInsertDocument,
+  dbInsertTemplate,
+  dbListDocumentsByLead,
+  dbListTemplates,
+  deleteFile,
+  downloadFile,
+  uploadFile
+} from "./supabase.js";
 
 export type Template = {
   id: string;
   name: string;
   filename: string;
-  createdAt: string;
+  created_at: string;
 };
 
 export type GeneratedDocument = {
   id: string;
-  leadId: number;
-  templateId: string;
-  templateName: string;
+  lead_id: number;
+  template_id: string;
+  template_name: string;
   filename: string;
-  createdAt: string;
+  created_at: string;
 };
 
-const META_FILE = path.join(TEMPLATES_DIR, "_meta.json");
-const DOCS_META_FILE = path.join(DOCUMENTS_DIR, "_meta.json");
-
-function ensureDirs() {
-  fs.mkdirSync(TEMPLATES_DIR, { recursive: true });
-  fs.mkdirSync(DOCUMENTS_DIR, { recursive: true });
+function mimeForExt(ext: string): string {
+  const map: Record<string, string> = {
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  };
+  return map[ext] ?? "application/octet-stream";
 }
 
-function readMeta<T>(file: string): T[] {
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8")) as T[];
-  } catch {
-    return [];
-  }
-}
-
-function writeMeta<T>(file: string, data: T[]) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
-}
-
-export function saveTemplate(originalName: string, buffer: Buffer): Template {
-  ensureDirs();
+export async function saveTemplate(originalName: string, buffer: Buffer): Promise<Template> {
   const id = uuidv4();
   const ext = path.extname(originalName);
   const filename = `${id}${ext}`;
-  fs.writeFileSync(path.join(TEMPLATES_DIR, filename), buffer);
 
-  const meta = readMeta<Template>(META_FILE);
-  const template: Template = {
+  await uploadFile(TEMPLATES_BUCKET, filename, buffer, mimeForExt(ext));
+
+  const row = {
     id,
     name: originalName.replace(ext, ""),
     filename,
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   };
-  meta.push(template);
-  writeMeta(META_FILE, meta);
-  return template;
+  await dbInsertTemplate(row);
+  return row;
 }
 
-export function listTemplates(): Template[] {
-  ensureDirs();
-  return readMeta<Template>(META_FILE);
+export async function listTemplates(): Promise<Template[]> {
+  return dbListTemplates();
 }
 
-export function getTemplate(id: string): Template | undefined {
-  return listTemplates().find((t) => t.id === id);
+export async function getTemplate(id: string): Promise<Template | null> {
+  return dbGetTemplate(id);
 }
 
-export function deleteTemplate(id: string): boolean {
-  ensureDirs();
-  const meta = readMeta<Template>(META_FILE);
-  const template = meta.find((t) => t.id === id);
+export async function deleteTemplate(id: string): Promise<boolean> {
+  const template = await dbGetTemplate(id);
   if (!template) return false;
-
-  const filePath = path.join(TEMPLATES_DIR, template.filename);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-  writeMeta(
-    META_FILE,
-    meta.filter((t) => t.id !== id)
-  );
+  await deleteFile(TEMPLATES_BUCKET, template.filename);
+  await dbDeleteTemplate(id);
   return true;
 }
 
-export function getTemplateBuffer(template: Template): Buffer {
-  return fs.readFileSync(path.join(TEMPLATES_DIR, template.filename));
+export async function getTemplateBuffer(template: Template): Promise<Buffer> {
+  return downloadFile(TEMPLATES_BUCKET, template.filename);
 }
 
-export function saveGeneratedDocument(
+export async function saveGeneratedDocument(
   leadId: number,
   templateId: string,
   templateName: string,
   buffer: Buffer,
   ext: string
-): GeneratedDocument {
-  ensureDirs();
+): Promise<GeneratedDocument> {
   const id = uuidv4();
   const filename = `${id}${ext}`;
-  fs.writeFileSync(path.join(DOCUMENTS_DIR, filename), buffer);
 
-  const meta = readMeta<GeneratedDocument>(DOCS_META_FILE);
-  const doc: GeneratedDocument = {
+  await uploadFile(DOCUMENTS_BUCKET, filename, buffer, mimeForExt(ext));
+
+  const row = {
     id,
-    leadId,
-    templateId,
-    templateName,
+    lead_id: leadId,
+    template_id: templateId,
+    template_name: templateName,
     filename,
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   };
-  meta.push(doc);
-  writeMeta(DOCS_META_FILE, meta);
-  return doc;
+  await dbInsertDocument(row);
+  return row;
 }
 
-export function listDocumentsByLead(leadId: number): GeneratedDocument[] {
-  ensureDirs();
-  return readMeta<GeneratedDocument>(DOCS_META_FILE).filter((d) => d.leadId === leadId);
+export async function listDocumentsByLead(leadId: number): Promise<GeneratedDocument[]> {
+  return dbListDocumentsByLead(leadId);
 }
 
-export function getDocument(id: string): GeneratedDocument | undefined {
-  ensureDirs();
-  return readMeta<GeneratedDocument>(DOCS_META_FILE).find((d) => d.id === id);
+export async function getDocument(id: string): Promise<GeneratedDocument | null> {
+  return dbGetDocument(id);
 }
 
-export function getDocumentBuffer(doc: GeneratedDocument): Buffer {
-  return fs.readFileSync(path.join(DOCUMENTS_DIR, doc.filename));
+export async function getDocumentBuffer(doc: GeneratedDocument): Promise<Buffer> {
+  return downloadFile(DOCUMENTS_BUCKET, doc.filename);
 }

@@ -13,7 +13,9 @@ const envSchema = z.object({
   AMO_CLIENT_ID: z.string().default(""),
   AMO_CLIENT_SECRET: z.string().default(""),
   AMO_REDIRECT_URI: z.string().default(""),
-  AMO_SUBDOMAIN: z.string().default("")
+  AMO_SUBDOMAIN: z.string().default(""),
+  SUPABASE_URL: z.string().default(""),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().default("")
 });
 
 const parsed = envSchema.safeParse(process.env);
