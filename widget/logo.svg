@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#0f1e3d"/>
+    </linearGradient>
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8f0fe"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#26c6da"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <clipPath id="roundedClip">
+      <rect width="400" height="400" rx="80" ry="80"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="80" ry="80" fill="url(#bg)"/>
+
+  <!-- Subtle grid dots -->
+  <g opacity="0.08" fill="#26c6da">
+    <circle cx="80" cy="80" r="3"/>
+    <circle cx="160" cy="80" r="3"/>
+    <circle cx="240" cy="80" r="3"/>
+    <circle cx="320" cy="80" r="3"/>
+    <circle cx="80" cy="160" r="3"/>
+    <circle cx="320" cy="160" r="3"/>
+    <circle cx="80" cy="240" r="3"/>
+    <circle cx="320" cy="240" r="3"/>
+    <circle cx="80" cy="320" r="3"/>
+    <circle cx="160" cy="320" r="3"/>
+    <circle cx="240" cy="320" r="3"/>
+    <circle cx="320" cy="320" r="3"/>
+  </g>
+
+  <!-- Main document -->
+  <g filter="url(#shadow)">
+    <path d="M130 100 L270 100 L270 300 L130 300 Z" rx="8" fill="url(#docGrad)" rx="8" ry="8"/>
+    <path d="M130 100 L130 300 Q130 308 138 308 L262 308 Q270 308 270 300 L270 100 Q270 92 262 92 L138 92 Q130 92 130 100 Z" fill="url(#docGrad)"/>
+  </g>
+
+  <!-- Folded corner top-right -->
+  <path d="M230 92 L270 132 L230 132 Z" fill="#b8cef8" opacity="0.7"/>
+  <path d="M230 92 L270 92 L270 132 Z" fill="#dce8ff" opacity="0.5"/>
+
+  <!-- Lines on document - row 1 (short: label) -->
+  <rect x="152" y="152" width="50" height="7" rx="3.5" fill="#26c6da" opacity="0.9"/>
+  <!-- Lines on document - row 1 value -->
+  <rect x="210" y="152" width="70" height="7" rx="3.5" fill="#1a2744" opacity="0.25"/>
+
+  <!-- Lines row 2 -->
+  <rect x="152" y="172" width="50" height="7" rx="3.5" fill="#26c6da" opacity="0.9"/>
+  <rect x="210" y="172" width="56" height="7" rx="3.5" fill="#1a2744" opacity="0.25"/>
+
+  <!-- Lines row 3 -->
+  <rect x="152" y="192" width="50" height="7" rx="3.5" fill="#26c6da" opacity="0.9"/>
+  <rect x="210" y="192" width="64" height="7" rx="3.5" fill="#1a2744" opacity="0.25"/>
+
+  <!-- Divider -->
+  <line x1="152" y1="215" x2="258" y2="215" stroke="#26c6da" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Bottom row - total sum area -->
+  <rect x="152" y="228" width="60" height="7" rx="3.5" fill="#1a2744" opacity="0.2"/>
+  <rect x="220" y="228" width="38" height="7" rx="3.5" fill="#26c6da"/>
+
+  <!-- Spark / checkmark circle at top-left -->
+  <circle cx="105" cy="105" r="28" fill="#26c6da" opacity="0.15"/>
+  <circle cx="105" cy="105" r="20" fill="#26c6da" opacity="0.25"/>
+  <!-- Lightning bolt: one-click symbol -->
+  <polygon points="109,88 100,107 108,107 101,122 113,102 105,102" fill="#00e5ff"/>
+
+</svg>

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: amo-docs-api
+    env: node
+    plan: starter
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
