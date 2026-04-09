@@ -14,6 +14,7 @@ import {
   saveGeneratedDocument,
   saveTemplate
 } from "../services/templates.js";
+import { addLeadNote } from "../services/amocrm.js";
 import { buildVariables } from "../services/variables.js";
 
 export const templatesRouter = Router();
@@ -121,6 +122,15 @@ templatesRouter.post("/:id/generate", async (req, res) => {
       resultBuffer,
       ".docx"
     );
+
+    // Не блокируем генерацию, если заметку добавить не удалось.
+    try {
+      const downloadUrl = `${req.protocol}://${req.get("host")}/api/v1/templates/documents/${generated.id}/download`;
+      const noteText = `📄 Создан документ: ${generated.template_name}\nСкачать: ${downloadUrl}`;
+      await addLeadNote(body.data.leadId, noteText);
+    } catch (_err) {
+      // ignore note errors
+    }
 
     return res.json({ document: generated });
   } catch (error) {

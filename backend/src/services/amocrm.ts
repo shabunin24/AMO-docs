@@ -128,6 +128,55 @@ export async function amoApiRequest<T>(path: string, query?: Record<string, stri
   return (await response.json()) as T;
 }
 
+type AmoRequestOptions = {
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  query?: Record<string, string>;
+  body?: unknown;
+};
+
+export async function amoApiRequestWithOptions<T>(path: string, options: AmoRequestOptions = {}) {
+  const actualToken = await ensureActualToken();
+  const url = new URL(`https://${actualToken.baseDomain}${path}`);
+  if (options.query) {
+    Object.entries(options.query).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+  }
+
+  const response = await fetch(url, {
+    method: options.method ?? "GET",
+    headers: {
+      Authorization: `Bearer ${actualToken.accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  if (response.status === 401) {
+    await refreshToken();
+    return amoApiRequestWithOptions<T>(path, options);
+  }
+
+  if (!response.ok) {
+    const raw = await response.text();
+    throw new Error(`amoCRM API request failed: ${response.status} ${raw}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function addLeadNote(leadId: number, text: string) {
+  return amoApiRequestWithOptions<unknown>(`/api/v4/leads/${leadId}/notes`, {
+    method: "POST",
+    body: [
+      {
+        note_type: "common",
+        params: { text }
+      }
+    ]
+  });
+}
+
 export function getConnectionStatus() {
   return {
     connected: Boolean(tokenStore),
