@@ -20,7 +20,7 @@ app.use("/widget", express.static(path.resolve(__dirname, "../../widget/src")));
 
 // Веб-приложение для генерации документов
 app.get("/app", (_req, res) => {
-  res.sendFile(path.resolve(__dirname, "../../public/app.html"));
+  res.sendFile(path.resolve(__dirname, "../public/app.html"));
 });
 
 app.use("/health", healthRouter);
