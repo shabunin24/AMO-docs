@@ -101,6 +101,25 @@ amocrmRouter.post("/oauth/refresh", async (_req, res) => {
   }
 });
 
+// Установить кастомное поле «Документы» (ссылка на /app) для всех сделок
+amocrmRouter.post("/setup/docs-field", async (_req, res) => {
+  try {
+    type FieldsResponse = { _embedded: { custom_fields: Array<{ id: number; name: string; type: string }> } };
+    const existing = await amoApiRequest<FieldsResponse>("/api/v4/leads/custom_fields");
+    const fields = existing?._embedded?.custom_fields ?? [];
+    const alreadyExists = fields.find((f) => f.name === "Документы AMO Docs");
+    if (alreadyExists) {
+      return res.json({ message: "Поле уже существует", fieldId: alreadyExists.id });
+    }
+
+    type CreateResponse = { _embedded: { custom_fields: Array<{ id: number; name: string }> } };
+    const created = await amoApiRequest<CreateResponse>("/api/v4/leads/custom_fields", undefined);
+    return res.json({ message: "Готово", data: created });
+  } catch (error) {
+    return res.status(500).json({ message: error instanceof Error ? error.message : "Ошибка" });
+  }
+});
+
 amocrmRouter.get("/leads/:leadId", async (req, res) => {
   const paramsSchema = z.object({
     leadId: z.coerce.number().int().positive()

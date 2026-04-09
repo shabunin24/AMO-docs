@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMO Docs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #273549;
+      --border: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --green: #22c55e;
+      --green-hover: #16a34a;
+      --red: #ef4444;
+      --radius: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .header-lead {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .header-lead span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .header-status {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .status-ok { background: #14532d; color: #86efac; }
+    .status-err { background: #7f1d1d; color: #fca5a5; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 680px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .card-body { padding: 16px; }
+
+    /* ── Lead info ── */
+    .lead-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .lead-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .lead-row:last-child { border-bottom: none; }
+
+    .lead-key { color: var(--text-muted); flex-shrink: 0; }
+    .lead-val { color: var(--text); text-align: right; font-weight: 500; word-break: break-word; }
+
+    /* ── Templates ── */
+    .tpl-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .tpl-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      transition: border-color 0.15s;
+    }
+
+    .tpl-item:hover { border-color: var(--accent); }
+
+    .tpl-icon { font-size: 20px; flex-shrink: 0; }
+
+    .tpl-info { flex: 1; overflow: hidden; }
+
+    .tpl-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tpl-ext {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Documents ── */
+    .doc-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .doc-info { flex: 1; overflow: hidden; }
+
+    .doc-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+    .btn-success { background: var(--green); color: #fff; padding: 5px 12px; font-size: 12px; }
+    .btn-success:hover:not(:disabled) { background: var(--green-hover); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+
+    .btn-ghost:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+
+    /* ── Empty / loading ── */
+    .empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 24px 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .empty code {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      word-break: break-all;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Section header ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      max-width: 320px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    #toast.show { display: block; }
+    #toast.toast-ok { border-color: var(--green); color: #86efac; }
+    #toast.toast-err { border-color: var(--red); color: #fca5a5; }
+
+    /* ── No lead banner ── */
+    .no-lead {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .no-lead h2 { font-size: 20px; color: var(--text); margin-bottom: 10px; }
+    .no-lead p { font-size: 14px; line-height: 1.6; }
+    .no-lead code { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-size: 13px; color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">📄 AMO Docs</div>
+  <div class="header-lead" id="headerLead">Загрузка…</div>
+  <div class="header-status" id="headerStatus"></div>
+</header>
+
+<div class="container" id="app">
+  <div class="no-lead">
+    <div class="spinner" style="margin: 0 auto 16px;"></div>
+    <p>Загрузка данных…</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = '';   // тот же origin
+
+  // ── utils ──────────────────────────────────────────────────────────
+  function qs(key) {
+    return new URLSearchParams(location.search).get(key);
+  }
+
+  function fmt(n) {
+    return new Intl.NumberFormat('ru-RU').format(n);
+  }
+
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  async function api(method, path, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(API + path, opts);
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(json.message || r.statusText);
+    return json;
+  }
+
+  function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show toast-' + type;
+    setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  // ── render ─────────────────────────────────────────────────────────
+  function renderLeadCard(lead) {
+    const contact = lead._embedded?.contacts?.[0];
+    const company = lead._embedded?.companies?.[0];
+    return `
+      <div class="card">
+        <div class="card-head">Сделка</div>
+        <div class="card-body">
+          <div class="lead-name">${lead.name || '—'}</div>
+          <div class="lead-row"><span class="lead-key">ID</span><span class="lead-val">#${lead.id}</span></div>
+          <div class="lead-row"><span class="lead-key">Бюджет</span><span class="lead-val">${fmt(lead.price || 0)} ₽</span></div>
+          ${contact ? `<div class="lead-row"><span class="lead-key">Контакт</span><span class="lead-val">${contact.name}</span></div>` : ''}
+          ${company ? `<div class="lead-row"><span class="lead-key">Компания</span><span class="lead-val">${company.name}</span></div>` : ''}
+          <div class="lead-row"><span class="lead-key">Создана</span><span class="lead-val">${new Date(lead.created_at * 1000).toLocaleDateString('ru-RU')}</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTemplates(templates, leadId) {
+    const items = templates.length === 0
+      ? `<div class="empty">Нет шаблонов.<br>Загрузите <code>.docx</code> файл через:<br><code>POST /api/v1/templates</code></div>`
+      : templates.map(t => `
+          <div class="tpl-item">
+            <span class="tpl-icon">📋</span>
+            <div class="tpl-info">
+              <div class="tpl-name">${t.name}</div>
+              <div class="tpl-ext">docx · ${new Date(t.created_at).toLocaleDateString('ru-RU')}</div>
+            </div>
+            <button class="btn btn-success gen-btn" data-id="${t.id}" data-lead="${leadId}">Создать</button>
+          </div>
+        `).join('');
+
+    return `
+      <div>
+        <div class="section-head">
+          <span class="section-title">Шаблоны (${templates.length})</span>
+        </div>
+        <div class="tpl-list">${items}</div>
+      </div>
+    `;
+  }
+
+  function renderDocuments(docs) {
+    const items = docs.length === 0
+      ? `<div class="empty">Документов нет.<br>Выберите шаблон и нажмите «Создать».</div>`
+      : docs.map(d => `
+          <div class="doc-item">
+            <span class="tpl-icon">📄</span>
+            <div class="doc-info">
+              <div class="doc-name">${d.template_name}</div>
+              <div class="doc-date">${fmtDate(d.created_at)}</div>
+            </div>
+            <a href="/api/v1/templates/documents/${d.id}/download" target="_blank" class="btn btn-ghost">⬇ Скачать</a>
+          </div>
+        `).join('');
+
+    return `
+      <div>
+        <div class="section-head">
+          <span class="section-title">Документы (${docs.length})</span>
+        </div>
+        <div class="doc-list" id="docList">${items}</div>
+      </div>
+    `;
+  }
+
+  // ── main ───────────────────────────────────────────────────────────
+  async function init() {
+    const leadId = qs('lead_id');
+    const app = document.getElementById('app');
+
+    // Нет lead_id → инструкция
+    if (!leadId) {
+      app.innerHTML = `
+        <div class="no-lead">
+          <h2>AMO Docs</h2>
+          <p>Добавьте параметр <code>?lead_id=XXXXXXX</code> к URL.<br>
+          Пример: <code>${location.origin}/app?lead_id=46995479</code></p>
+        </div>`;
+      document.getElementById('headerLead').textContent = 'Укажите lead_id в URL';
+      return;
+    }
+
+    // Статус подключения
+    try {
+      const status = await api('GET', '/api/v1/amocrm/status');
+      const el = document.getElementById('headerStatus');
+      if (status.connected) {
+        el.textContent = '● Подключено';
+        el.className = 'header-status status-ok';
+      } else {
+        el.textContent = '● Не подключено';
+        el.className = 'header-status status-err';
+      }
+    } catch {}
+
+    // Параллельная загрузка данных
+    let lead, templates, docs;
+    try {
+      [lead, { items: templates }, { items: docs }] = await Promise.all([
+        api('GET', `/api/v1/amocrm/leads/${leadId}`).then(r => r.lead),
+        api('GET', '/api/v1/templates'),
+        api('GET', `/api/v1/templates/documents/lead/${leadId}`)
+      ]);
+    } catch (e) {
+      app.innerHTML = `<div class="no-lead"><h2>Ошибка загрузки</h2><p>${e.message}</p></div>`;
+      return;
+    }
+
+    document.getElementById('headerLead').innerHTML =
+      `Сделка: <span>${lead.name || '#' + lead.id}</span>`;
+
+    app.innerHTML = `
+      ${renderLeadCard(lead)}
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        ${renderTemplates(templates, leadId)}
+        ${renderDocuments(docs)}
+      </div>
+    `;
+
+    // Генерация документа
+    app.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.gen-btn');
+      if (!btn) return;
+
+      const tplId = btn.dataset.id;
+      const lId = btn.dataset.lead;
+      const origText = btn.textContent;
+
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled = true;
+
+      try {
+        const { document: doc } = await api('POST', `/api/v1/templates/${tplId}/generate`, { leadId: Number(lId) });
+
+        toast('✓ Документ создан', 'ok');
+
+        // Добавить в список документов без перезагрузки
+        const docList = document.getElementById('docList');
+        const emptyEl = docList.querySelector('.empty');
+        if (emptyEl) docList.innerHTML = '';
+
+        const newItem = document.createElement('div');
+        newItem.className = 'doc-item';
+        newItem.innerHTML = `
+          <span class="tpl-icon">📄</span>
+          <div class="doc-info">
+            <div class="doc-name">${doc.template_name}</div>
+            <div class="doc-date">${fmtDate(doc.created_at)}</div>
+          </div>
+          <a href="/api/v1/templates/documents/${doc.id}/download" target="_blank" class="btn btn-ghost">⬇ Скачать</a>
+        `;
+        docList.prepend(newItem);
+
+        // Обновить счётчик
+        const title = app.querySelector('.section-title:last-of-type');
+        const cur = parseInt(title?.textContent?.match(/\d+/)?.[0] || '0');
+        if (title) title.textContent = `Документы (${cur + 1})`;
+
+        // Авто-скачивание
+        window.open(`/api/v1/templates/documents/${doc.id}/download`, '_blank');
+
+      } catch (err) {
+        toast('Ошибка: ' + err.message, 'err');
+      } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  init();
+</script>
+</body>
+</html>
