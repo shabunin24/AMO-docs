@@ -1,24 +1,72 @@
-define(['jquery', 'underscore'], function ($, _) {
-  var AmoDocs = function () {
+// Только jquery: зависимость от underscore ломала инициализацию, если модуль недоступен в require amo.
+define(['jquery'], function ($) {
+  var CustomWidget = function () {
     var self = this;
 
     // -----------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------
     function apiUrl() {
-      return (self.params && self.params.api_url) || 'https://amo-docs.onrender.com';
+      var raw =
+        (self.params && self.params.api_url) ||
+        (self.params && self.params.backend_url) ||
+        'https://amo-docs.onrender.com';
+      return String(raw).replace(/\/+$/, '');
     }
 
     function leadId() {
-      return self.params && self.params.lead_id;
+      var p = self.params || {};
+      if (p.lead_id != null && p.lead_id !== '') {
+        return p.lead_id;
+      }
+      if (p.id != null && p.id !== '') {
+        return p.id;
+      }
+      try {
+        if (typeof APP !== 'undefined' && APP.constant) {
+          var cardEl = APP.constant('card_element');
+          if (cardEl && cardEl.id) {
+            return cardEl.id;
+          }
+          var fromConst = APP.constant('card_id');
+          if (fromConst) {
+            return fromConst;
+          }
+        }
+        if (typeof APP !== 'undefined' && APP.data && APP.data.current_card && APP.data.current_card.id) {
+          return APP.data.current_card.id;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      return null;
     }
 
     function widgetCode() {
-      return self.params && self.params.widget_code;
+      if (self.params && self.params.widget_code) {
+        return self.params.widget_code;
+      }
+      if (typeof self.get_settings === 'function') {
+        try {
+          var st = self.get_settings();
+          if (st && st.widget_code) {
+            return st.widget_code;
+          }
+        } catch (e2) {
+          /* ignore */
+        }
+      }
+      return null;
     }
 
+    // Для lcard-1 amo отрисовывает правую колонку только после render_template().
+    // Селектор .widget-body-* без него часто пустой — виджет «молчит», хотя script.js грузится.
     function $container() {
-      return $('.widget-body-' + widgetCode());
+      var code = widgetCode();
+      if (!code) {
+        return $();
+      }
+      return $('.amd-widget-root-' + code);
     }
 
     function ajax(method, path, data) {
@@ -46,12 +94,40 @@ define(['jquery', 'underscore'], function ($, _) {
       );
     }
 
+    function bindListUiHandlers() {
+      var $root = $container();
+      if (!$root.length) {
+        return;
+      }
+      $root.off('.amoDocsList');
+      $root.on('click.amoDocsList', '.amd-create', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        ajax('GET', '/api/v1/templates')
+          .done(function (data) {
+            renderModal(data.items || []);
+          })
+          .fail(function () {
+            alert('Не удалось загрузить список шаблонов');
+          });
+      });
+      $root.on('click.amoDocsList', '.amd-dl', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var docId = $(this).data('doc');
+        window.open(apiUrl() + '/api/v1/templates/documents/' + docId + '/download', '_blank');
+      });
+    }
+
     function renderDocuments(docs) {
       var id = leadId();
       var html = '<div class="amd-wrap">';
       html += '<div class="amd-header">';
       html += '<span class="amd-title">Документы (' + docs.length + ')</span>';
-      html += '<button class="amd-btn amd-btn-primary amd-create" data-lead="' + id + '">+ Создать</button>';
+      html +=
+        '<button type="button" class="amd-btn amd-btn-primary amd-create" data-lead="' +
+        id +
+        '">+ Создать</button>';
       html += '</div>';
 
       if (docs.length === 0) {
@@ -72,6 +148,7 @@ define(['jquery', 'underscore'], function ($, _) {
 
       html += '</div>';
       $container().html(html);
+      bindListUiHandlers();
     }
 
     // -----------------------------------------------------------------
@@ -158,9 +235,41 @@ define(['jquery', 'underscore'], function ($, _) {
 
       render: function () {
         var id = leadId();
-        if (!id) return true;
+        var code = widgetCode();
+        if (!code) {
+          return true;
+        }
 
-        renderLoading();
+        if (typeof self.render_template === 'function') {
+          var cssHref = (self.params && self.params.path) || '';
+          var cssTag = cssHref
+            ? '<link rel="stylesheet" type="text/css" href="' + cssHref + '/style.css">'
+            : '';
+          // По доке amo: при передаче готового HTML в body нужно явно указать render: ''.
+          self.render_template({
+            caption: {
+              class_name: 'amd-widget-caption-' + code,
+              html: ''
+            },
+            body:
+              cssTag +
+              '<div class="amd-widget-root-' +
+              code +
+              '"><div class="amd-wrap"><div class="amd-empty">Загрузка…</div></div></div>',
+            render: ''
+          });
+        } else {
+          $('.widget-body-' + code).html(
+            '<div class="amd-widget-root-' +
+              code +
+              '"><div class="amd-wrap"><div class="amd-empty">Загрузка…</div></div></div>'
+          );
+        }
+
+        if (!id) {
+          renderError('Не удалось определить ID сделки (обновите страницу).');
+          return true;
+        }
 
         ajax('GET', '/api/v1/templates/documents/lead/' + id)
           .done(function (data) {
@@ -174,28 +283,15 @@ define(['jquery', 'underscore'], function ($, _) {
       },
 
       bind_actions: function () {
-        // Create button
-        $(document).on('click', '.amd-create', function () {
-          ajax('GET', '/api/v1/templates')
-            .done(function (data) {
-              renderModal(data.items || []);
-            })
-            .fail(function () {
-              alert('Не удалось загрузить список шаблонов');
-            });
-        });
-
-        // Download button
-        $(document).on('click', '.amd-dl', function (e) {
-          e.preventDefault();
-          var docId = $(this).data('doc');
-          window.open(apiUrl() + '/api/v1/templates/documents/' + docId + '/download', '_blank');
-        });
-
+        // Клики вешаются на контейнер в bindListUiHandlers() после render — см. destroy/render.
         return true;
       },
 
       destroy: function () {
+        var c = widgetCode();
+        if (c) {
+          $('.amd-widget-root-' + c).off('.amoDocsList');
+        }
         $(document).off('click', '.amd-create');
         $(document).off('click', '.amd-dl');
         removeModal();
@@ -210,5 +306,5 @@ define(['jquery', 'underscore'], function ($, _) {
     return this;
   };
 
-  return AmoDocs;
+  return CustomWidget;
 });

@@ -1,0 +1,13 @@
+{
+  "backend_url": "URL backend (API)",
+  "widget": {
+    "name": "AMO Docs",
+    "short_description": "Создание документов по шаблонам из карточки сделки",
+    "description": "Генерация документов из шаблонов с данными сделки, контактов и компании. Укажите URL вашего backend в настройках.",
+    "tour_description": "В правой колонке сделки отображается список документов. Нажмите «+ Создать», выберите шаблон — документ сформируется и скачается."
+  },
+  "settings": {
+    "api_url": "URL API (backend), например https://amo-docs.onrender.com",
+    "backend_url": "URL backend (тот же адрес API, если в манифесте поле backend_url)"
+  }
+}

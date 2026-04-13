@@ -50,8 +50,9 @@ function formatDateLong(timestamp: number): string {
   });
 }
 
-function formatPrice(value: number): string {
-  return new Intl.NumberFormat("ru-RU").format(value);
+function formatPrice(value: number | string | null | undefined): string {
+  const n = typeof value === "number" && Number.isFinite(value) ? value : Number(value);
+  return new Intl.NumberFormat("ru-RU").format(Number.isFinite(n) ? n : 0);
 }
 
 function extractCustomFields(fields: AmoCustomField[] | undefined): Record<string, string> {
@@ -65,15 +66,19 @@ function extractCustomFields(fields: AmoCustomField[] | undefined): Record<strin
 }
 
 export async function buildVariables(leadId: number): Promise<Record<string, string>> {
+  // Для GET /api/v4/leads/{id} в `with` допустимы только значения из доки amo (contacts, catalog_elements, …).
+  // Параметры `companies` и `tags` там не перечислены — лишние значения дают 400. Теги и компания приходят в _embedded без них.
   const lead = await amoApiRequest<AmoLead>(`/api/v4/leads/${leadId}`, {
-    with: "contacts,companies,tags"
+    with: "contacts"
   });
+
+  const priceNum = Number(lead.price ?? 0);
 
   const vars: Record<string, string> = {
     lead_id: String(lead.id),
     lead_name: lead.name ?? "",
-    lead_price: formatPrice(lead.price ?? 0),
-    lead_price_raw: String(lead.price ?? 0),
+    lead_price: formatPrice(Number.isFinite(priceNum) ? priceNum : 0),
+    lead_price_raw: String(Number.isFinite(priceNum) ? priceNum : 0),
     lead_created_at: formatDate(lead.created_at),
     lead_updated_at: formatDate(lead.updated_at),
     date_today: formatDate(Math.floor(Date.now() / 1000)),

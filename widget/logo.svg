@@ -41,7 +41,6 @@
 
   <!-- Main document -->
   <g filter="url(#shadow)">
-    <path d="M130 100 L270 100 L270 300 L130 300 Z" rx="8" fill="url(#docGrad)" rx="8" ry="8"/>
     <path d="M130 100 L130 300 Q130 308 138 308 L262 308 Q270 308 270 300 L270 100 Q270 92 262 92 L138 92 Q130 92 130 100 Z" fill="url(#docGrad)"/>
   </g>
 

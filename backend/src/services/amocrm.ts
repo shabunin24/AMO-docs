@@ -1,4 +1,4 @@
-import { config } from "../config.js";
+import { config, normalizeAmoSubdomain } from "../config.js";
 
 type AmoTokenResponse = {
   token_type: string;
@@ -20,11 +20,12 @@ export type AmoTokenStore = {
 let tokenStore: AmoTokenStore | null = null;
 
 function getOauthBaseUrl() {
-  return `https://${config.AMO_SUBDOMAIN}.amocrm.ru`;
+  const sub = normalizeAmoSubdomain(config.AMO_SUBDOMAIN);
+  return `https://${sub}.amocrm.ru`;
 }
 
 function assertAmoConfig() {
-  if (!config.AMO_CLIENT_ID || !config.AMO_CLIENT_SECRET || !config.AMO_REDIRECT_URI || !config.AMO_SUBDOMAIN) {
+  if (!config.AMO_CLIENT_ID || !config.AMO_CLIENT_SECRET || !config.AMO_REDIRECT_URI || !normalizeAmoSubdomain(config.AMO_SUBDOMAIN)) {
     throw new Error("AMO env vars are not configured");
   }
 }
@@ -55,7 +56,7 @@ async function requestToken(payload: Record<string, string>) {
     accessToken: tokenData.access_token,
     refreshToken: tokenData.refresh_token,
     expiresAt: Date.now() + tokenData.expires_in * 1000 - 60_000,
-    baseDomain: tokenData.base_domain ?? `${config.AMO_SUBDOMAIN}.amocrm.ru`
+    baseDomain: tokenData.base_domain ?? `${normalizeAmoSubdomain(config.AMO_SUBDOMAIN)}.amocrm.ru`
   };
 
   return tokenStore;
@@ -99,6 +100,22 @@ async function ensureActualToken() {
   return tokenStore;
 }
 
+async function parseAmoSuccessJson<T>(response: Response): Promise<T> {
+  const raw = await response.text();
+  if (!raw.trim()) {
+    throw new Error(
+      response.status === 204
+        ? "amoCRM API: сущность не найдена (пустой ответ 204)"
+        : `amoCRM API: пустой ответ (HTTP ${response.status})`
+    );
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    throw new Error(`amoCRM API: ответ не JSON (HTTP ${response.status}): ${raw.slice(0, 500)}`);
+  }
+}
+
 export async function amoApiRequest<T>(path: string, query?: Record<string, string>) {
   const actualToken = await ensureActualToken();
   const url = new URL(`https://${actualToken.baseDomain}${path}`);
@@ -125,7 +142,7 @@ export async function amoApiRequest<T>(path: string, query?: Record<string, stri
     throw new Error(`amoCRM API request failed: ${response.status} ${raw}`);
   }
 
-  return (await response.json()) as T;
+  return parseAmoSuccessJson<T>(response);
 }
 
 type AmoRequestOptions = {
@@ -162,7 +179,7 @@ export async function amoApiRequestWithOptions<T>(path: string, options: AmoRequ
     throw new Error(`amoCRM API request failed: ${response.status} ${raw}`);
   }
 
-  return (await response.json()) as T;
+  return parseAmoSuccessJson<T>(response);
 }
 
 export async function addLeadNote(leadId: number, text: string) {

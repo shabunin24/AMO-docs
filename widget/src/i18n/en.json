@@ -1,0 +1,13 @@
+{
+  "backend_url": "Backend (API) URL",
+  "widget": {
+    "name": "AMO Docs",
+    "short_description": "Create documents from templates in the lead card",
+    "description": "Generate documents from templates using deal, contact and company data. Set your backend URL in settings.",
+    "tour_description": "Documents appear in the lead card sidebar. Click «+ Create», pick a template — the file is generated and downloaded."
+  },
+  "settings": {
+    "api_url": "API URL (backend), e.g. https://amo-docs.onrender.com",
+    "backend_url": "Backend URL (same API base if your manifest uses backend_url)"
+  }
+}

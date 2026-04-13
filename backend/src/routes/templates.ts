@@ -17,6 +17,18 @@ import {
 import { addLeadNote } from "../services/amocrm.js";
 import { buildVariables } from "../services/variables.js";
 
+function formatGenerateError(error: unknown): string {
+  if (!(error instanceof Error)) return "Ошибка генерации";
+  const anyErr = error as Error & { properties?: { errors?: Array<{ properties?: { explanation?: string } }> } };
+  const nested = anyErr.properties?.errors
+    ?.map((e) => e.properties?.explanation)
+    .filter(Boolean);
+  if (nested?.length) {
+    return `${error.message}: ${nested.join("; ")}`;
+  }
+  return error.message;
+}
+
 export const templatesRouter = Router();
 
 const upload = multer({
@@ -134,7 +146,8 @@ templatesRouter.post("/:id/generate", async (req, res) => {
 
     return res.json({ document: generated });
   } catch (error) {
-    return res.status(500).json({ message: error instanceof Error ? error.message : "Ошибка генерации" });
+    console.error("[templates/generate]", error);
+    return res.status(500).json({ message: formatGenerateError(error) });
   }
 });
 
